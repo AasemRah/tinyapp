@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/AasemRah/tinyapp/issues"
   },
-  "homepage": "https://github.com/AasemRah/tinyapp#readme"
+  "homepage": "https://github.com/AasemRah/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
