@@ -21,6 +21,10 @@
       </div>
       <div class="card-footer text-muted"></div>
     </div>
+    <form method="POST" action="/urls/<%= shortURL %>/update">
+      <input name="newURL"/> <button type="submit" class=" btn btn-primary">Update</button>
+    </form>
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
