@@ -15,6 +15,8 @@ function generateRandomString() {
   return randomString;
 }
 
+
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -48,26 +50,25 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const usersId = req.cookies.usersId;
-  console.log('usersId---', usersId);
   const templateVars = { urls: urlDatabase,
-    username: req.cookies['username'],
-    user : users[usersId]
+    userID: req.cookies['userID'],
+    user : users[req.cookies["userID"]],
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: "username"
+    userID: req.cookies["userID"],
+    user: users[req.cookies["userID"]],
   };
   res.render("urls_new", templateVars);
-
 });
+
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL];
-  const templateVars = { longURL: longURL, shortURL: shortURL, username: "username" };
+  const templateVars = { longURL: longURL, shortURL: shortURL, userID: req.cookies["userID"], users: users[req.cookies["userID"]]};
   res.render("urls_show", templateVars);
 });
 
@@ -75,16 +76,24 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/u/:shortURL", (req, res) => { 
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
+});
+
 app.get('/register', (req, res) => {
   const templateVars ={
-    username: req.cookies["username"]
+    userID: req.cookies["userID"],
+    user: users[req.cookies["userID"]],
   };
   res.render("user_registeration", templateVars)
 });
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    username: req.cookies['username']
+    userID: null,
+    user: users[req.cookies['userID']],
   }
     res.render("user_login", templateVars);
   });
@@ -108,51 +117,49 @@ app.post("/urls/:shortURL/update", (req, res) => {
   res.redirect("/urls/");
 });
 
-app.post("/login/", (req,res) => {
-  res.cookie('username', req.body.username)
-  res.redirect("/urls/");
-  });
-  
-  app.post("/logout/", (req,res) => {
-    res.clearCookie('username', req.body.username)
-    res.redirect("/urls/");
-    });
-
-app.get("/u/:shortURL", (req, res) => { 
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+app.post("/login", (req, res) => {
+  let email = req.body.email;
+  console.log("reguest body", req.body);
+  let password = req.body.password;
+  for (const user in users) {
+    if (users[user].email !== email) {
+      return res.status(403).send("Status: 403 An account does not exist.");
+    }
+    if (users[user].password === password) {
+      res.cookie("userID", users[user].id);
+      return res.redirect("/urls");
+    }
+    return res.status(403).send("You have entered the wrong password.");
+  }
 });
 
-  app.post('/register', (req, res) => {
-    const { email, password } = req.body;
-  
-    // Check if the email or password are empty strings
-    if (!email || !password) {
-      res.status(400).send('Email and password are required');
-      return;
-    }
-  
-    // Check if the email already exists in the users object
-    for (const userId in users) {
-      const user = users[userId];
-      if (user.email === email) {
-        res.status(400).send('Email already registered');
-        return;
-      }
-    }
+app.post("/logout", (req, res) => {
+  res.clearCookie("userID", users[req.cookies.userID]);
+  res.redirect("/urls");
+});
 
+app.post("/register", (req, res) => {
+  let email = req.body.email;
+  if (!req.body.email || !req.body.password) {
+    return res
+      .status(400)
+      .send("The email or password was left empty. Please try again.");
+  }
+  for (const user in users) {
+    if (users[user].email === email) {
+      return res.status(400).send("An account already exists.");
+    }
+  }
 
-  let ID =  generateRandomString();
+  let ID = generateRandomString();
   users[ID] = {
     id: ID,
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
   };
-  res.cookie('userId', ID);
-  console.log('users----',users);
-    res.redirect("/urls");
-
+  res.cookie("user_id", ID);
+  console.log("users----", users);
+  res.redirect("/urls");
 });
 
 //PORT LISTENER

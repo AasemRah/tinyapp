@@ -16,25 +16,27 @@
     <main style="margin: 1em;">
       <div class="card-header"></div>
     <h3>Login with your Email</h3>
-    <% if (!username) { %>
+    <% if (!userID) { %>
       <form class="form-inline position-absolute-right " action="/login" method="POST">
-        <label for="username">
-          <%= username %>
+        <label for="userID">
+          <%= userID %>
         </label>
-        <input class="form-control" type="text" name="username" placeholder="Username"
+        <input class="form-control" type="text" name="email" placeholder="your email"
           style="width: 225px; margin-right: 10px;">
+          <input class="form-control" type="text" name="password" placeholder="password"
+          style="width: 225px; margin-right: 10px;"/>
         <button type="submit" class="btn btn-outline-dark">Login</button>
       </form>
       <% } else { %>
         <form class="form-inline justify-content-right" action="/logout" method="POST">
-          <label for="username" style="margin-right: 10px;">
+          <label for="userID" style="margin-right: 10px;">
             Logged in as: <%= user.email %>
           </label>
           <button type="submit" class="btn btn-outline-dark">Logout</button>
         </form>
         <% } %>
       </form>
-      
+
 <!-- Bootstrap JS -->
 <script
 src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
