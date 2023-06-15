@@ -24,6 +24,20 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 //GET ROUTE HANDLERS
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -34,8 +48,11 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const usersId = req.cookies.usersId;
+  console.log('usersId---', usersId);
   const templateVars = { urls: urlDatabase,
-    username: req.cookies['username']
+    username: req.cookies['username'],
+    user : users[usersId]
   };
   res.render("urls_index", templateVars);
 });
@@ -56,6 +73,13 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.get('/register', (req, res) => {
+  const templateVars ={
+    username: req.cookies["username"]
+  };
+  res.render("user_registeration", templateVars)
 });
 
 app.post("/urls", (req, res) => {
@@ -91,6 +115,20 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
+});
+
+app.post('/register',(req,res) => {
+
+  let ID =  generateRandomString();
+  users[ID] = {
+    id: ID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('userId', ID);
+  console.log('users----',users);
+    res.redirect("/urls");
+
 });
 
 //PORT LISTENER
