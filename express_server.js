@@ -117,7 +117,24 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-app.post('/register',(req,res) => {
+  app.post('/register', (req, res) => {
+    const { email, password } = req.body;
+  
+    // Check if the email or password are empty strings
+    if (!email || !password) {
+      res.status(400).send('Email and password are required');
+      return;
+    }
+  
+    // Check if the email already exists in the users object
+    for (const userId in users) {
+      const user = users[userId];
+      if (user.email === email) {
+        res.status(400).send('Email already registered');
+        return;
+      }
+    }
+
 
   let ID =  generateRandomString();
   users[ID] = {
