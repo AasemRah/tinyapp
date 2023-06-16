@@ -25,38 +25,38 @@
           <tr>
             <th scope="col">Short URL</th>
             <th scope="col">Long URL</th>
-            <th scope="col">Delete</th>
             <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
         <tbody>
-          <% if(Object.keys(urls).length === 0 && !user) { %>
-            <div class="alert alert-info">
-              <strong>Error!</strong> Please Register/Login and create URLs in order to see them below!
+          <% if(Object.keys(urls).length===0 && !user) { %>
+            <div class="alert alert-danger">
+              Please login to your account
             </div>
             <% } %>
-  
             <% if(Object.keys(urls).length===0 && user) { %>
-              <div class="alert alert-info">
-                <strong>Error!</strong> You must create a URL
+                <div class="alert alert-info alert-dismissible">
+                  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                  <strong>You currently have no URLs to display</strong> 
+                </div>
               </div>
               <% } %>
           <% for(let url in urls) { %>
             <tr>
               <td>
-                <a href='urls/<%=url %>'>
                   <%= url %>
-                </a>
               </td>
               <td>
-                <%= urls[url] %>
+                <%= urls[url].longURL %>
               </td>
               <td>
-                <form method="POST" action="/urls/<%=url%>/delete"><button class="btn btn-danger">Delete</button></form>
+                <form method="GET" action="/urls/<%=url%>">
+                  <button type="submit" class="btn btn-info">Edit</button>
+                </form>
                 </td>
                 <td>
-                <form method="GET" action="/urls/<%=url %>">
-                  <button type="submit" class="btn btn-outline-primary">Edit</button> </form>
+                <form method="POST" action="/urls/<%=url%>/delete"><button class="btn btn-danger">Delete</button></form>
               </td>
             </tr>
           <% } %>

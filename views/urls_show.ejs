@@ -21,8 +21,11 @@
       </div>
       <div class="card-footer text-muted"></div>
     </div>
-    <form method="POST" action="/urls/<%= shortURL %>/update">
-      <input name="newURL"/> <button type="submit" class=" btn btn-primary">Update</button>
+    <form class="form-inline justify-content-center" method="POST" action="/urls/<%= shortURL %>/edit"> 
+      <label for ="longURL">newURL:</label>
+      <input class="form-control" 
+      type="text" name="newURL" placeholder="http://" style="width: 300px; margin: 1em">
+      <button type="submit" class=" btn btn-info">Edit</button>
     </form>
 
     <!-- Bootstrap JS -->
