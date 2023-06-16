@@ -15,6 +15,18 @@ function generateRandomString() {
   return randomString;
 }
 
+const urlsForUser = function (userID) {
+  const filteredURLS = {};
+  console.log(userID);
+  for (let shortURL in urlDatabase) {
+    if (userID === urlDatabase[shortURL].userID) {
+      filteredURLS[shortURL] = urlDatabase[shortURL];
+    }
+    console.log("test---", filteredURLS);
+  }
+  return filteredURLS;
+};
+
 
 
 app.set("view engine", "ejs");
@@ -49,8 +61,16 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get("/users.json", (req, res) => {
+  res.json(users);
+});
+
 app.get("/urls", (req, res) => {
+  if (!req.cookies["userID"]) {
+    return res.redirect("/login");
+  }
   const templateVars = { urls: urlDatabase,
+    urls: urlsForUser (req.cookies["userID"]),
     userID: req.cookies['userID'],
     user : users[req.cookies["userID"]],
   };
@@ -66,9 +86,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
-  const templateVars = { longURL: longURL, shortURL: shortURL, userID: req.cookies["userID"], users: users[req.cookies["userID"]]};
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
+  if (req.cookies["userID"] !== urlDatabase[shortURL].userID) {
+    return res.send("You are not authorized to edit this"); 
+  }
+  const templateVars = { longURL: longURL, shortURL: shortURL, userID: req.cookies["userID"], users: users[req.cookies["userID"]], user: users[req.cookies["userID"]]};
   res.render("urls_show", templateVars);
 });
 
@@ -99,21 +122,34 @@ app.get("/login", (req, res) => {
   });
 
 app.post("/urls", (req, res) => {
+  if (!req.cookies["userID"]) {
+    return res.redirect("/login");
+  }
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  console.log("here");
+  urlDatabase[shortURL] = { longURL: longURL, userID: req.cookies["userID"] };
+  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`); 
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  if (req.cookies["userID"] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+    res.redirect("/urls/");
+  } else {
+    res.send("You are not authorized to delete this");
+  }
   res.redirect("/urls/");
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.newURL;
+  if (req.cookies["userID"] !== urlDatabase[shortURL].userID) {
+    return res.send("You are not authorized to edit this"); 
+  }
+  urlDatabase[shortURL].longURL = req.body.newURL;
   res.redirect("/urls/");
 });
 
@@ -122,15 +158,16 @@ app.post("/login", (req, res) => {
   console.log("reguest body", req.body);
   let password = req.body.password;
   for (const user in users) {
-    if (users[user].email !== email) {
-      return res.status(403).send("Status: 403 An account does not exist.");
-    }
+    if (users[user].email === email) {
     if (users[user].password === password) {
       res.cookie("userID", users[user].id);
       return res.redirect("/urls");
     }
     return res.status(403).send("You have entered the wrong password.");
   }
+}
+
+  return res.status(403).send("Status: 403 An account does not exist.");
 });
 
 app.post("/logout", (req, res) => {
