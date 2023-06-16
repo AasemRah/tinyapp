@@ -30,6 +30,17 @@
           </tr>
         </thead>
         <tbody>
+          <% if(Object.keys(urls).length === 0 && !user) { %>
+            <div class="alert alert-info">
+              <strong>Error!</strong> Please Register/Login and create URLs in order to see them below!
+            </div>
+            <% } %>
+  
+            <% if(Object.keys(urls).length===0 && user) { %>
+              <div class="alert alert-info">
+                <strong>Error!</strong> You must create a URL
+              </div>
+              <% } %>
           <% for(let url in urls) { %>
             <tr>
               <td>

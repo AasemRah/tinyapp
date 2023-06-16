@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require ("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 
 function generateRandomString() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -35,22 +36,30 @@ app.use(express.json());
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "$2a$10$pWTEC9A4T0gEhlPl1yxQTOKnP642wdO8d7bdMAq4ql2lboa5H7lUG",// "purple-monkey-dinosaur"
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "$2a$10$n//OI1rqSEff3K0Zm43C4uwcL/TjZGZNZki/8RQgP0pcxByDTTT9.", // "dishwasher-funk"
   },
 };
+
+
 
 //GET ROUTE HANDLERS
 app.get("/", (req, res) => {
@@ -159,7 +168,7 @@ app.post("/login", (req, res) => {
   let password = req.body.password;
   for (const user in users) {
     if (users[user].email === email) {
-    if (users[user].password === password) {
+    if (bcrypt.compareSync(password, users[user].password)) {
       res.cookie("userID", users[user].id);
       return res.redirect("/urls");
     }
@@ -189,12 +198,13 @@ app.post("/register", (req, res) => {
   }
 
   let ID = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   users[ID] = {
     id: ID,
     email: req.body.email,
-    password: req.body.password,
+    password: hashedPassword,
   };
-  res.cookie("user_id", ID);
+  res.cookie("userID", ID);
   console.log("users----", users);
   res.redirect("/urls");
 });
