@@ -201,7 +201,7 @@ app.post("/login", (req, res) => {
 
 //Request to logut of users account and deletes cookies after logout
 app.post("/logout", (req, res) => {
-  res.session = null;
+  req.session = null;
   res.redirect("/urls");
 });
 
